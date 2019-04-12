@@ -74,19 +74,13 @@ int main(int argc, char** argv)
 	}
 	
 
-
-
-	/* Set the encryption key
-	 * A valid key comprises 16 hexidecimal
-	 * characters. Below is one example.
-	 * Your program should take input from
-	 * command line.
-	 */
 	// cipher->setKey((unsigned char*)cipherKey);
 	cipher->setKey(cipherKey);
 	
+	// Open file
+
 	/* Perform encryption */
-	string cipherText = cipher->encrypt("hello world");
+	// string cipherText = cipher->encrypt("hello world");
 	
 	// /* Perform decryption */
 	// cipher->decrypt(cipherText);	
