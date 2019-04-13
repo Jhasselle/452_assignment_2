@@ -42,8 +42,10 @@ bool DES::setKey(const unsigned char* keyArray)
 	fprintf(stdout, "DES KEY: ");
 	
 	/* Print the key */
-	for(keyIndex = 0; keyIndex < 8; ++keyIndex)
+	for(keyIndex = 0; keyIndex < 8; ++keyIndex){
+        cout << "keyIndex: " << keyIndex << endl;
 		fprintf(stdout, "%x", this->des_key[keyIndex]);
+    }
 	
 	fprintf(stdout, "\n");	
 	
@@ -67,7 +69,7 @@ bool DES::setKey(const unsigned char* keyArray)
  */
 unsigned char* DES::encrypt(const unsigned char* plaintext)
 {
-     cout << "ENCRYPTING!!";
+     // cout << "ENCRYPTING!!";
 	//LOGIC:
 	//1. Check to make sure that the block is exactly 8 characters (i.e. 64 bits)
     unsigned char * returnCipherText = new unsigned char [DES_BLOCK_SIZE];
@@ -75,19 +77,13 @@ unsigned char* DES::encrypt(const unsigned char* plaintext)
     unsigned char * secondHalf = new unsigned char[4];
     DES_LONG block[2];
 
-    if (plaintext[0] == '\0')
-        {
 
-            fprintf(stderr, "ERROR [%s %s %d]: Invalid DES encryption block size.\n", 
-            __FILE__, __FUNCTION__, __LINE__);
-            exit(-1);
+  
+    for (int i=0; i<(DES_BLOCK_SIZE / 2); ++i){
+            firstHalf[i] = plaintext[i + 0];
+            secondHalf[i] = plaintext[i + 4];
         }
-    else {
-        for (int i=0; i<(DES_BLOCK_SIZE / 2); ++i){
-                firstHalf[i] = plaintext[i + 0];
-                secondHalf[i] = plaintext[i + 4];
-            }
-        }
+    
     
     
     //3. Use ctol() to convert the first 4 chars into long; store the result in block[0]
@@ -95,7 +91,7 @@ unsigned char* DES::encrypt(const unsigned char* plaintext)
     //4. Use ctol() to convert the second 4 chars into long; store the resul in block[1]
 	block[1] = ctol(secondHalf);
     //5. Perform des_encrypt1 in order to encrypt the block using this->key (see sample codes for details)
-    DES_encrypt1(block, &this->key, 1);
+    DES_encrypt1(block, &this->key, ENC);
     //6. Convert the first ciphertext long to 4 characters using ltoc()
 	ltoc(block[0], returnCipherText);
     //7. Convert the second ciphertext long to 4 characters using ltoc()
@@ -117,7 +113,7 @@ unsigned char* DES::encrypt(const unsigned char* plaintext)
  */
 unsigned char* DES::decrypt(const unsigned char* ciphertext)
 {
-    cout << "DECRYPTING!!";
+    // cout << "DECRYPTING!!";
 	//LOGIC:
 	// Same logic as encrypt(), except in step 5. decrypt instead of encrypting
     //1. Check to make sure that the block is exactly 8 characters (i.e. 64 bits)
@@ -126,19 +122,12 @@ unsigned char* DES::decrypt(const unsigned char* ciphertext)
     unsigned char * secondHalf = new unsigned char[4];
     DES_LONG block[2];
 
-    if (ciphertext[0] == '\0')
-        {
 
-            fprintf(stderr, "ERROR [%s %s %d]: Invalid DES encryption block size.\n", 
-            __FILE__, __FUNCTION__, __LINE__);
-            exit(-1);
-        }
-    else {
-        for (int i=0; i<(DES_BLOCK_SIZE / 2); ++i){
+        for (int i=0; i<8; ++i){
                 firstHalf[i] = ciphertext[i + 0];
                 secondHalf[i] = ciphertext[i + 4];
             }
-        }
+        
     
     
     //3. Use ctol() to convert the first 4 chars into long; store the result in block[0]
@@ -146,7 +135,7 @@ unsigned char* DES::decrypt(const unsigned char* ciphertext)
     //4. Use ctol() to convert the second 4 chars into long; store the resul in block[1]
     block[1] = ctol(secondHalf);
     //5. Perform des_encrypt1 in order to encrypt the block using this->key (see sample codes for details)
-    DES_encrypt1(block, &this->key, 0);
+    DES_encrypt1(block, &this->key, DEC);
     //6. Convert the first ciphertext long to 4 characters using ltoc()
     ltoc(block[0], returnPlaintext);
     //7. Convert the second ciphertext long to 4 characters using ltoc()

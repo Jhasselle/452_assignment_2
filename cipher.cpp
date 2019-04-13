@@ -14,7 +14,7 @@ int main(int argc, char** argv)
 	/**
 	 * TODO: Replace the code below	with your code which can SWITCH
 	 * between DES and AES and encrypt files. DO NOT FORGET TO PAD
-	 * THE LAST BLOCK IF NECESSARY.
+	 * THE LAST BLOCK IF NECESSARY.if (!cipher->setKey(cipherKey))
 	 *
 	 * NOTE: due to the incomplete skeleton, the code may crash or
 	 * misbehave.
@@ -42,16 +42,7 @@ int main(int argc, char** argv)
 
 		// check key length
 	for (int i = 0; i < cipherKeyLength; ++i) {
-
-		if (cipherKeyString[i] == '\0')
-		{
-			fprintf(stderr, "ERROR [%s %s %d]: Invalid key length. Please use an alpha-numeric key of length 16\n",	
-			__FILE__, __FUNCTION__, __LINE__);
-			exit(-1);
-		}
-		else {
 			cipherKey[i] = cipherKeyString[i];
-		}
 	}
 
 	if ((cipherType == "DES" || cipherType == "des") && cipherKeyLength == DES_KEY_LENGTH) {
@@ -78,7 +69,11 @@ int main(int argc, char** argv)
 	}
 	
 	// cipher->setKey((unsigned char*)cipherKey);
-	cipher->setKey(cipherKey);
+	if (!cipher->setKey(cipherKey)) {
+		fprintf(stderr, "ERROR [%s %s %d]:  Invalid cipher key!\n",	
+		__FILE__, __FUNCTION__, __LINE__);
+		exit(-1);
+	}
 	
 	// Open file
 	ifstream inputFileStream;
@@ -88,36 +83,48 @@ int main(int argc, char** argv)
 
 	unsigned char * blockCiphertext = new unsigned char [blockSize];
 	stringstream sstr;
+	unsigned char c;
 
-	while (inputFileStream.peek() != '\0' && !inputFileStream.eof()) {
-		unsigned char * blockPlaintext = new unsigned char [blockSize];
-		int i = 0;
-		while (i < blockSize) {
 
-			if (inputFileStream.peek() != '\0') {
-				unsigned char c = inputFileStream.get();
+	int tempInt = 0;
+
+	while (inputFileStream >> c) {
+		unsigned char * blockPlaintext = new unsigned char [8] ; 
+		fill(blockPlaintext, blockPlaintext + 8, ' ');
+		blockPlaintext[0] = c;
+		cout << blockPlaintext << endl;
+		for (int i = 1; i < 8; ++i) {
+			if (inputFileStream >> c && !inputFileStream.eof()) {
 				blockPlaintext[i] = c;
-				++i;
-			} 
+				cout << blockPlaintext << endl;
+			}
 			else {
 				break;
 			}
 		}
+		cout << endl;
 
-		if (i > 0) {
-			if (encodingType == "ENC") {
-				blockCiphertext = cipher->encrypt(blockPlaintext);
-			}
-			else {
-				blockCiphertext = cipher->decrypt(blockPlaintext);
-			}
-			
-			sstr << blockCiphertext;
+		 
+		if (encodingType == "ENC") {
+			cout << "ENC: " << tempInt;
+			tempInt++;
+
+
+			blockCiphertext = cipher->encrypt(blockPlaintext);
 		}
-		
+		else {
+			cout << "DEC:" << tempInt;
+			tempInt++;
 
-		delete [] blockPlaintext;		
+
+			blockCiphertext = cipher->decrypt(blockPlaintext);
+		}
+		sstr << blockCiphertext;
+		delete [] blockPlaintext;
 	}
+					
+	
+
 
 	inputFileStream.close();
 	outputFileStream.open(outputFileName);
