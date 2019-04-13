@@ -67,6 +67,7 @@ bool DES::setKey(const unsigned char* keyArray)
  */
 unsigned char* DES::encrypt(const unsigned char* plaintext)
 {
+     cout << "ENCRYPTING!!";
 	//LOGIC:
 	//1. Check to make sure that the block is exactly 8 characters (i.e. 64 bits)
     unsigned char * returnCipherText = new unsigned char [DES_BLOCK_SIZE];
@@ -105,7 +106,6 @@ unsigned char* DES::encrypt(const unsigned char* plaintext)
 	//9. Return the pointer to the dynamically allocated array.
     delete [] firstHalf;
     delete [] secondHalf;
-    delete [] block;
 
 	return returnCipherText;
 }

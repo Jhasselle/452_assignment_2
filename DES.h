@@ -14,6 +14,8 @@
 #include <iostream>
 
 #define DES_BLOCK_SIZE 8
+#define ENC 1
+#define DEC 0
 
 using namespace std;
 

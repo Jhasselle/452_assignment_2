@@ -89,20 +89,18 @@ int main(int argc, char** argv)
 	unsigned char * blockCiphertext = new unsigned char [blockSize];
 	stringstream sstr;
 
-	while (!inputFileStream.eof()) {
+	while (inputFileStream.peek() != '\0' && !inputFileStream.eof()) {
 		unsigned char * blockPlaintext = new unsigned char [blockSize];
 		int i = 0;
 		while (i < blockSize) {
 
-			unsigned char c = inputFileStream.get();
-			
-			if (inputFileStream.peek() == '\0') {
-				// exit the loop
-				i = blockSize;
-			}
-			else {
+			if (inputFileStream.peek() != '\0') {
+				unsigned char c = inputFileStream.get();
 				blockPlaintext[i] = c;
 				++i;
+			} 
+			else {
+				break;
 			}
 		}
 
@@ -123,7 +121,7 @@ int main(int argc, char** argv)
 
 	inputFileStream.close();
 	outputFileStream.open(outputFileName);
-	outputFileStream << sstr.str();
+	outputFileStream << sstr.rdbuf();
 	outputFileStream.close();
 
 
