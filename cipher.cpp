@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include "CipherInterface.h"
 #include "DES.h"
 #include "AES.h"
@@ -91,24 +92,43 @@ int main(int argc, char** argv)
 	
 	// Open file
 	ifstream inputFileStream;
-	inputFileStream.open (inputFileName);
-	string str = "";
-	int tempInt = 0;
+	ofstream outputFileStream;
+	inputFileStream.open(inputFileName);
+	int fileSize = inputFileStream.tellg();
+
+	unsigned char * blockCiphertext = new unsigned char [blockSize];
+	stringstream sstr;
+
 	while (!inputFileStream.eof()) {
-		unsigned char * block = new unsigned char [blockSize];
+		unsigned char * blockPlaintext = new unsigned char [blockSize];
 		int i = 0;
-		while (!inputFileStream.eof() || i < blockSize) {
-			++tempInt;
+		while (i < blockSize) {
+
 			unsigned char c = inputFileStream.get();
-			cout << c;
-			++i;
+			
+			if (inputFileStream.peek() == '\0') {
+				// exit the loop
+				i = blockSize;
+			}
+			else {
+				blockPlaintext[i] = c;
+				++i;
+			}
 		}
-		cout << endl;
+
+		if (i > 0) {
+			blockCiphertext = cipher->encrypt(blockPlaintext);
+			sstr << blockCiphertext;
+		}
 		
+
+		delete [] blockPlaintext;		
 	}
-	// inputFileStream >> "Writing this to a file.\n";
-	cout << tempInt;
+
 	inputFileStream.close();
+	outputFileStream.open(outputFileName);
+	outputFileStream << sstr.str();
+	outputFileStream.close();
 
 
 	/* Perform encryption */
@@ -116,6 +136,8 @@ int main(int argc, char** argv)
 	
 	// /* Perform decryption */
 	// cipher->decrypt(cipherText);	
+
+	delete [] blockCiphertext;
 	
 	return 0;
 }

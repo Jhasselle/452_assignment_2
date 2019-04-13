@@ -9,6 +9,12 @@
 #include "CipherInterface.h"
 #include <ctype.h>
 
+
+
+#include <iostream>
+
+#define DES_BLOCK_SIZE 8
+
 using namespace std;
 
 /** 

@@ -69,17 +69,44 @@ unsigned char* DES::encrypt(const unsigned char* plaintext)
 {
 	//LOGIC:
 	//1. Check to make sure that the block is exactly 8 characters (i.e. 64 bits)
-	//2. Declate an array DES_LONG block[2];
-	//3. Use ctol() to convert the first 4 chars into long; store the result in block[0]
-	//4. Use ctol() to convert the second 4 chars into long; store the resul in block[1]
-	//5. Perform des_encrypt1 in order to encrypt the block using this->key (see sample codes for details)
-	//6. Convert the first ciphertext long to 4 characters using ltoc()
-	//7. Convert the second ciphertext long to 4 characters using ltoc()
-	//8. Save the results in the the dynamically allocated char array 
-	// (e.g. unsigned char* bytes = nerw unsigned char[8]).
+    unsigned char * returnCipherText = new unsigned char [DES_BLOCK_SIZE];
+    unsigned char * firstHalf = new unsigned char[4];
+    unsigned char * secondHalf = new unsigned char[4];
+    DES_LONG block[2];
+
+    if (plaintext[0] == '\0')
+        {
+
+            fprintf(stderr, "ERROR [%s %s %d]: Invalid DES encryption block size.\n", 
+            __FILE__, __FUNCTION__, __LINE__);
+            exit(-1);
+        }
+    else {
+        for (int i=0; i<(DES_BLOCK_SIZE / 2); ++i){
+                firstHalf[i] = plaintext[i + 0];
+                secondHalf[i] = plaintext[i + 4];
+            }
+        }
+    
+    
+    //3. Use ctol() to convert the first 4 chars into long; store the result in block[0]
+    block[0] = ctol(firstHalf);
+    //4. Use ctol() to convert the second 4 chars into long; store the resul in block[1]
+	block[1] = ctol(secondHalf);
+    //5. Perform des_encrypt1 in order to encrypt the block using this->key (see sample codes for details)
+    DES_encrypt1(block, &this->key, 1);
+    //6. Convert the first ciphertext long to 4 characters using ltoc()
+	ltoc(block[0], returnCipherText);
+    //7. Convert the second ciphertext long to 4 characters using ltoc()
+	ltoc(block[1], returnCipherText + 4);
+    //8. Save the results in the the dynamically allocated char array 
+    // (e.g. unsigned char* bytes = nerw unsigned char[8]).
+
 	//9. Return the pointer to the dynamically allocated array.
-	
-	return NULL;
+    delete [] firstHalf;
+    delete [] secondHalf;
+
+	return returnCipherText;
 }
 
 /**

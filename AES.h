@@ -9,6 +9,8 @@
 #include "CipherInterface.h"
 #include <ctype.h>
 
+#define AES_BLOCK_SIZE = 16
+
 using namespace std;
 
 /** 
