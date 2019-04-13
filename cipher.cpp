@@ -53,11 +53,6 @@ int main(int argc, char** argv)
 			cipherKey[i] = cipherKeyString[i];
 		}
 	}
-	
-
-	
-
-
 
 	if ((cipherType == "DES" || cipherType == "des") && cipherKeyLength == DES_KEY_LENGTH) {
 		/* Create an instance of the DES cipher */	
@@ -74,11 +69,6 @@ int main(int argc, char** argv)
 		exit(-1);
 	}
 
-
-
-	
-	
-	
 	/* Error checks */
 	if(!cipher)
 	{
@@ -117,7 +107,13 @@ int main(int argc, char** argv)
 		}
 
 		if (i > 0) {
-			blockCiphertext = cipher->encrypt(blockPlaintext);
+			if (encodingType == "ENC") {
+				blockCiphertext = cipher->encrypt(blockPlaintext);
+			}
+			else {
+				blockCiphertext = cipher->decrypt(blockPlaintext);
+			}
+			
 			sstr << blockCiphertext;
 		}
 		
@@ -130,12 +126,6 @@ int main(int argc, char** argv)
 	outputFileStream << sstr.str();
 	outputFileStream.close();
 
-
-	/* Perform encryption */
-	// string cipherText = cipher->encrypt("hello world");
-	
-	// /* Perform decryption */
-	// cipher->decrypt(cipherText);	
 
 	delete [] blockCiphertext;
 	
