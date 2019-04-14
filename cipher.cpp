@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <openssl/des.h>
 #include "CipherInterface.h"
 #include "DES.h"
 #include "AES.h"
@@ -11,10 +12,11 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+	int mainTraceIterator = 1;
 	/**
 	 * TODO: Replace the code below	with your code which can SWITCH
 	 * between DES and AES and encrypt files. DO NOT FORGET TO PAD
-	 * THE LAST BLOCK IF NECESSARY.if (!cipher->setKey(cipherKey))
+	 * THE LAST BLOCK IF NECESSARY.
 	 *
 	 * NOTE: due to the incomplete skeleton, the code may crash or
 	 * misbehave.
@@ -28,10 +30,16 @@ int main(int argc, char** argv)
 	char * inputFileName = argv[4];
 	char * outputFileName = argv[5];
 
-	CipherInterface* cipher = NULL; 
+	unsigned char * honestCipher = reinterpret_cast<unsigned char*>(argv[2]);
+	cout << "honestCipher" << honestCipher << endl;
 	unsigned int cipherKeyLength = cipherKeyStringSpiteCpp.length();
 	unsigned char cipherKey [cipherKeyLength];
 	unsigned int blockSize = 0;
+
+
+
+
+	CipherInterface* cipher = NULL; 
 
 	// Check if all arguments are present
 	if (!outputFileName || !inputFileName) {
@@ -40,19 +48,25 @@ int main(int argc, char** argv)
 		exit(-1);
 	}
 
+
 		// check key length
 	for (int i = 0; i < cipherKeyLength; ++i) {
 			cipherKey[i] = cipherKeyString[i];
+						// if (cipherKeyLength == 16) cipherKey[i] == '\0';
 	}
+					// cout << "cipherKey[16] " << cipherKey[16] << endl;
+
+
+
 
 	if ((cipherType == "DES" || cipherType == "des") && cipherKeyLength == DES_KEY_LENGTH) {
 		/* Create an instance of the DES cipher */	
 		cipher = new DES(); 
-		blockSize = DES_KEY_LENGTH / 2;
+		blockSize = 8;
 	}
 	else if ((cipherType == "AES" || cipherType == "aes") && cipherKeyLength == AES_KEY_LENGTH)  {
 		cipher = new AES(); 
-		blockSize = AES_KEY_LENGTH / 2;
+		blockSize = 16;
 	}
 	else {
 		fprintf(stderr, "ERROR [%s %s %d]: Invalid encryption type. Please use DES or AES \n",	
@@ -69,66 +83,83 @@ int main(int argc, char** argv)
 	}
 	
 	// cipher->setKey((unsigned char*)cipherKey);
-	if (!cipher->setKey(cipherKey)) {
+	if (cipher->setKey(honestCipher)) {
 		fprintf(stderr, "ERROR [%s %s %d]:  Invalid cipher key!\n",	
 		__FILE__, __FUNCTION__, __LINE__);
 		exit(-1);
 	}
 	
+
 	// Open file
 	ifstream inputFileStream;
+	inputFileStream.open(inputFileName, ios::in);
 	ofstream outputFileStream;
-	inputFileStream.open(inputFileName);
-	int fileSize = inputFileStream.tellg();
+	outputFileStream.open(outputFileName, ios::out);
+	
 
 	unsigned char * blockCiphertext = new unsigned char [blockSize];
 	stringstream sstr;
 	unsigned char c;
 
 
-	int tempInt = 0;
 
-	while (inputFileStream >> c) {
-		unsigned char * blockPlaintext = new unsigned char [8] ; 
-		fill(blockPlaintext, blockPlaintext + 8, ' ');
+	while (inputFileStream >> noskipws >> c) {
+		unsigned char * blockPlaintext = new unsigned char [9] ; 
+		fill(blockPlaintext, blockPlaintext + 9, ' ');
 		blockPlaintext[0] = c;
-		cout << blockPlaintext << endl;
+		cout << noskipws << c << " ";
+		blockPlaintext[8] = '\0';
+
 		for (int i = 1; i < 8; ++i) {
-			if (inputFileStream >> c && !inputFileStream.eof()) {
+			if (inputFileStream >> noskipws >> c) {
+				cout << noskipws << c << " ";
 				blockPlaintext[i] = c;
-				cout << blockPlaintext << endl;
 			}
 			else {
-				break;
+				cout << "<break>" << " ";
+				//break;
 			}
 		}
-		cout << endl;
-
 		 
 		if (encodingType == "ENC") {
-			cout << "ENC: " << tempInt;
-			tempInt++;
-
-
-			blockCiphertext = cipher->encrypt(blockPlaintext);
+			outputFileStream << cipher->encrypt(blockPlaintext);
+		}
+		else if (encodingType == "DEC") {
+			outputFileStream << cipher->decrypt(blockPlaintext);
 		}
 		else {
-			cout << "DEC:" << tempInt;
-			tempInt++;
-
-
-			blockCiphertext = cipher->decrypt(blockPlaintext);
+			fprintf(stderr, "ERROR [%s %s %d]: Invalid encryption type. Please use DES or AES \n",	
+		__FILE__, __FUNCTION__, __LINE__);
+		exit(-1);
 		}
-		sstr << blockCiphertext;
+		
 		delete [] blockPlaintext;
 	}
 					
-	
+
+	/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+		cout << "\nOutput for Step " << mainTraceIterator << endl;
+		++mainTraceIterator;
+
+		cout << "cipherType" << ": " << cipherType << endl;
+		cout << "cipherKeyString" << ": " << cipherKeyString << endl;
+		cout << "cipherKeyStringSpiteCpp" << ": " << cipherKeyStringSpiteCpp << endl;
+		cout << "encodingType" << ": " << encodingType << endl;
+		cout << "inputFileName" << ": " << inputFileName << endl;
+		cout << "outputFileName" << ": " << outputFileName << endl;
+		cout << "cipherKeyLength" << ": " << cipherKeyLength << endl;
+		cout << "cipherKey" << ": " << cipherKey << endl;
+		cout << "blockSize" << ": " << blockSize << endl;
+
+		// cout << "strlen(cipherKey)" << ": " << strlen(cipherKey) << endl;
+
+
+		
+
+	/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 
 	inputFileStream.close();
-	outputFileStream.open(outputFileName);
-	outputFileStream << sstr.rdbuf();
 	outputFileStream.close();
 
 
@@ -136,3 +167,4 @@ int main(int argc, char** argv)
 	
 	return 0;
 }
+

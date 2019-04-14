@@ -7,11 +7,12 @@
  */
 bool DES::setKey(const unsigned char* keyArray)
 {
+     cout << "keyArray " << keyArray << endl;
 	/**
 	 * First let's covert the char string
 	 * into an integer byte string
 	 */
-	
+	// cout << "keyArray " << keyArray << endl;
 	
 	/* The key error code */
 	int keyErrorCode = -1;
@@ -29,9 +30,12 @@ bool DES::setKey(const unsigned char* keyArray)
 	while(desKeyIndex != 8)
 	{
 		/* Convert the key if the character is valid */
-		if((this->des_key[desKeyIndex] = twoCharToHexByte(keyArray + keyIndex)) == 'z')
+		if((this->des_key[desKeyIndex] = twoCharToHexByte(keyArray + keyIndex)) == 'z') {
+            cout << "setKey returning false " << endl;
 			return false;
+        }
 		
+                        // cout << "current key " << keyArray + keyIndex << endl;
 		/* Go to the second pair of characters */
 		keyIndex += 2;	
 		
@@ -43,15 +47,15 @@ bool DES::setKey(const unsigned char* keyArray)
 	
 	/* Print the key */
 	for(keyIndex = 0; keyIndex < 8; ++keyIndex){
-        cout << "keyIndex: " << keyIndex << endl;
-		fprintf(stdout, "%x", this->des_key[keyIndex]);
+		cout << this->des_key[keyIndex] << endl;
     }
+    // cout << this->des_key << endl;
 	
 	fprintf(stdout, "\n");	
 	
 	
 	/* Set the encryption key */
-	if ((keyErrorCode = DES_set_key_checked(&des_key, &this->key)) != 0)
+	if ((keyErrorCode = DES_set_key_checked(&this->des_key, &this->key)) != 0)
 	{
 		fprintf(stderr, "\nkey error %d\n", keyErrorCode);
 		
@@ -69,23 +73,19 @@ bool DES::setKey(const unsigned char* keyArray)
  */
 unsigned char* DES::encrypt(const unsigned char* plaintext)
 {
-     // cout << "ENCRYPTING!!";
-	//LOGIC:
 	//1. Check to make sure that the block is exactly 8 characters (i.e. 64 bits)
     unsigned char * returnCipherText = new unsigned char [DES_BLOCK_SIZE];
     unsigned char * firstHalf = new unsigned char[4];
     unsigned char * secondHalf = new unsigned char[4];
     DES_LONG block[2];
-
-
   
-    for (int i=0; i<(DES_BLOCK_SIZE / 2); ++i){
+    for (int i=0; i < 4; ++i ) {
             firstHalf[i] = plaintext[i + 0];
             secondHalf[i] = plaintext[i + 4];
         }
-    
-    
-    
+
+    // cout << "firstHalf: " << firstHalf << endl;
+    // cout << "secondHalf: " << secondHalf << endl;
     //3. Use ctol() to convert the first 4 chars into long; store the result in block[0]
     block[0] = ctol(firstHalf);
     //4. Use ctol() to convert the second 4 chars into long; store the resul in block[1]
@@ -93,15 +93,19 @@ unsigned char* DES::encrypt(const unsigned char* plaintext)
     //5. Perform des_encrypt1 in order to encrypt the block using this->key (see sample codes for details)
     DES_encrypt1(block, &this->key, ENC);
     //6. Convert the first ciphertext long to 4 characters using ltoc()
+
+    // cout << returnCipherText << endl;
 	ltoc(block[0], returnCipherText);
+    // cout << returnCipherText << endl;
     //7. Convert the second ciphertext long to 4 characters using ltoc()
 	ltoc(block[1], returnCipherText + 4);
+    // cout << returnCipherText << endl;
     //8. Save the results in the the dynamically allocated char array 
     // (e.g. unsigned char* bytes = nerw unsigned char[8]).
 
 	//9. Return the pointer to the dynamically allocated array.
-    delete [] firstHalf;
-    delete [] secondHalf;
+    // delete [] firstHalf;
+    // delete [] secondHalf;
 
 	return returnCipherText;
 }
@@ -113,7 +117,7 @@ unsigned char* DES::encrypt(const unsigned char* plaintext)
  */
 unsigned char* DES::decrypt(const unsigned char* ciphertext)
 {
-    // cout << "DECRYPTING!!";
+
 	//LOGIC:
 	// Same logic as encrypt(), except in step 5. decrypt instead of encrypting
     //1. Check to make sure that the block is exactly 8 characters (i.e. 64 bits)
@@ -123,10 +127,10 @@ unsigned char* DES::decrypt(const unsigned char* ciphertext)
     DES_LONG block[2];
 
 
-        for (int i=0; i<8; ++i){
-                firstHalf[i] = ciphertext[i + 0];
-                secondHalf[i] = ciphertext[i + 4];
-            }
+    for (int i=0; i < 4; ++i ) {
+            firstHalf[i] = ciphertext[i + 0];
+            secondHalf[i] = ciphertext[i + 4];
+        }
         
     
     
@@ -137,6 +141,7 @@ unsigned char* DES::decrypt(const unsigned char* ciphertext)
     //5. Perform des_encrypt1 in order to encrypt the block using this->key (see sample codes for details)
     DES_encrypt1(block, &this->key, DEC);
     //6. Convert the first ciphertext long to 4 characters using ltoc()
+
     ltoc(block[0], returnPlaintext);
     //7. Convert the second ciphertext long to 4 characters using ltoc()
     ltoc(block[1], returnPlaintext + 4);
@@ -144,8 +149,8 @@ unsigned char* DES::decrypt(const unsigned char* ciphertext)
     // (e.g. unsigned char* bytes = nerw unsigned char[8]).
 
     //9. Return the pointer to the dynamically allocated array.
-    delete [] firstHalf;
-    delete [] secondHalf;
+    // delete [] firstHalf;
+    // delete [] secondHalf;
 
     return returnPlaintext;
 }
@@ -192,13 +197,20 @@ void DES::ltoc(DES_LONG l, unsigned char *c)
 unsigned char DES::charToHex(const char& character)
 {
 	/* Is the first digit 0-9 ? */	
-	if(character >= '0' && character <= '9')	
+	if(character >= '0' && character <= '9') {
+        // cout << "if(character >= '0' && character <= '9') true, char = " << character << endl;	
 		/* Convert the character to hex */
+        // cout << "Convert the character to hex, character - '0' normal = " << character - '0' << endl;  
+        // cout << ios::hex << "Convert the character to hex, character - '0' hex = " << character - '0' << endl; 
 		return character - '0';
+    }
 	/* It the first digit a letter 'a' - 'f'? */
-	else if(character >= 'a' && character <= 'f')
-		/* Conver the cgaracter to hex */
+	else if(character >= 'a' && character <= 'f') {
+		// /* Conver the cgaracter to hex */
+  //       cout << "Convert the character to hex, (character - 97) + 10 " << (character - 97) + 10 << endl;  
+  //       cout << ios::hex << "Convert the character to hex, (character - 97) + 10  hex = " << (character - 97) + 10 << endl; 
 		return (character - 97) + 10;	
+    }
 	/* Invalid character */
 	else return 'z';
 }

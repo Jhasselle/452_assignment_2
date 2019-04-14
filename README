@@ -1,4 +1,10 @@
-./cipher DES 0123456789abcdef ENC INPUT_FILE.txt OUTPUT_FILE.TXT
+
+
+./cipher DES 0123456789abcdef ENC INPUT_FILE.txt encoded.txt
+./cipher DES "0123456789abcdef" DEC encoded.txt decoded.txt
+
+
+
 
 
 

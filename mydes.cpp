@@ -124,6 +124,8 @@ int main()
 	/* Convert the first 4 bytes of plaintext from long to char */
 	ltoc(in[0], decryptedText);
 	ltoc(in[1], decryptedText + 4);
+
+	fprintf(stderr, "Decrypted text: %s\n", decryptedText);
 }
 
 
